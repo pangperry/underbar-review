@@ -421,19 +421,13 @@
     //map sorted array back to just original values?
 
     var transformed = [];
-    var undefineds = _.filter(collection, function(item) {
-      return item === undefined;
-    });
-    var filtered = _.reject(collection, function(item) {
-      return item === undefined;
-    });
-
+    
     if (typeof iterator === 'function') {
-      transformed = _.map(filtered, function(item) {
+      transformed = _.map(collection, function(item) {
         return iterator(item);
       });
     } else {
-      transformed = _.map(filtered, function(item) {
+      transformed = _.map(collection, function(item) {
         return item[iterator];
       });
     }
@@ -441,17 +435,28 @@
     var combined = [];
     var sorted;
     _.each(transformed, function(item, index) {
-      combined.push([item, filtered[index]]);
+      combined.push([item, collection[index]]);
     }); 
 
-    sorted = combined.sort(function(itemA, itemB) {
+    var undefineds = _.filter(combined, function(item) {
+      return item[0] === undefined;
+    });
+    var filtered = _.reject(combined, function(item) {
+      return item[0] === undefined;
+    });
+
+
+    sorted = filtered.sort(function(itemA, itemB) {
       return itemA[0] - itemB[0];
     });
-    
+   
     var endResult = _.map(sorted, function(pair) {
       return pair[1];
-    }).concat(undefineds);
-
+    });
+    endResult = endResult.concat(_.map(undefineds, function(pair) {
+      return pair[1];
+    }));
+    
     if (JSON.stringify(endResult) === JSON.stringify(collection)) {
       return collection;
     }
@@ -466,6 +471,22 @@
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
+    var results = [];
+    var arrays = [...arguments];
+  
+    var lengths = _.map(arrays, function(array) { return array.length; });
+    
+    var longestLength = Math.max.apply(null, lengths);
+
+    for (var i = 0; i < longestLength; i++) {
+      var indexItems = [];
+      for (var o = 0; o < arrays.length; o++) {
+        indexItems.push(arrays[o][i]);
+      }
+      results.push(indexItems);
+    }
+        
+    return results;
   };
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
@@ -473,6 +494,16 @@
   //
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(nestedArray, result) {
+    var results = [];
+    _.each(nestedArray, function(item) {
+      if (!Array.isArray(item)) {
+        results.push(item);
+      } else {
+        results = results.concat(_.flatten(item));
+      }
+    });
+
+    return results;
   };
 
   // Takes an arbitrary number of arrays and produces an array that contains

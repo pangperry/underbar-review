@@ -47,12 +47,12 @@
         people = _.sortBy(people, function(person) {
           return person.age;
         });
-
         expect(_.pluck(people, 'name')).to.eql(['moe', 'curly']);
       });
 
       it('should handle undefined values', function() {
         var list = [undefined, 4, 1, undefined, 3, 2];
+        // debugger;
         var result = _.sortBy(list, function(i) { return i; });
 
         expect(result).to.eql([1, 2, 3, 4, undefined, undefined]);
@@ -70,7 +70,7 @@
           this.x = x;
           this.y = y;
         };
-
+        
         var collection = [
           new Pair(1, 1), new Pair(1, 2),
           new Pair(1, 3), new Pair(1, 4),
