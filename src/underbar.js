@@ -395,6 +395,19 @@
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
+    var results;
+
+    if (typeof functionOrKey === 'function') {
+      results = _.map(collection, function(item) {
+        return functionOrKey.apply(item, args);
+      });
+    } else {
+      results = _.map(collection, function(item) {
+        return item[functionOrKey].apply(item, args);
+      });
+    }
+
+    return results;
   };
 
   // Sort the object's values by a criterion produced by an iterator.
@@ -402,6 +415,49 @@
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
+    //transform collection with invoke/iterator
+    //map array to have tuples [[orginal item, transformed item], [pair2]....]
+    //sort mapped array by tranformed value
+    //map sorted array back to just original values?
+
+    var transformed = [];
+    var undefineds = _.filter(collection, function(item) {
+      return item === undefined;
+    });
+    var filtered = _.reject(collection, function(item) {
+      return item === undefined;
+    });
+
+    if (typeof iterator === 'function') {
+      transformed = _.map(filtered, function(item) {
+        return iterator(item);
+      });
+    } else {
+      transformed = _.map(filtered, function(item) {
+        return item[iterator];
+      });
+    }
+
+    var combined = [];
+    var sorted;
+    _.each(transformed, function(item, index) {
+      combined.push([item, filtered[index]]);
+    }); 
+
+    sorted = combined.sort(function(itemA, itemB) {
+      return itemA[0] - itemB[0];
+    });
+    
+    var endResult = _.map(sorted, function(pair) {
+      return pair[1];
+    }).concat(undefineds);
+
+    if (JSON.stringify(endResult) === JSON.stringify(collection)) {
+      return collection;
+    }
+
+    return endResult;
+    
   };
 
   // Zip together two or more arrays with elements of the same index
